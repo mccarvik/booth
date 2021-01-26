@@ -295,6 +295,7 @@ def prob2():
     # plt.savefig("./scatter_seat.png", dpi=400)
     # plt.close()
     
+    seat['date'] = seat.apply(lambda x: dt.datetime(1900+ int(x['year']), int(x['month']), 1, 0, 0), axis=1)
     seat['log_driv'] = np.log(seat['drivers'])
     seat['season_m_sin'] = np.sin((2 * np.pi * seat['month']) / 12)
     seat['season_m_cos'] = np.cos((2 * np.pi * seat['month']) / 12)
@@ -317,6 +318,7 @@ def prob2():
     seat['lagd_2'] = seat['diff'].shift(2)
     seat['lagd_3'] = seat['diff'].shift(3)
     seat['lagd_4'] = seat['diff'].shift(4)
+    seat['lagd_12'] = seat['diff'].shift(12)
     seat2 = seat
     seat2 = seat.dropna()
     
@@ -378,11 +380,10 @@ def prob2():
     
     
     ##### Add lags #####
-    # formula = "diff ~ petrol + lagd_1 + lagd_2"
-    # formula = "diff ~ lagd_1 + lagd_2"
-    # # formula = "log_driv ~ petrol + year + lag_1 + lag_3"
-    # # formula = "log_driv ~ petrol + year + lag_1 + lag_12 + lag_24"
-    # # formula = "log_driv ~ petrol + lag_1 + lag_12 + lag_24"
+    # formula = "diff ~ petrol + lagd_1 + lagd_2 + lagd_12"
+    # formula = "diff ~ lagd_1 + lagd_2 + lagd_12"
+    # formula = "log_driv ~ petrol + lag_1 + lag_12"
+    # formula = "log_driv ~ petrol + lag_1 + lag_2 + lag_3 + lag_12"
     # reg = sm.ols(formula=formula, data=seat).fit()
     # anova = stats.stats.anova_lm(reg, typ=2)
     # print(reg.summary())
@@ -396,18 +397,18 @@ def prob2():
     # R^2 calc for diff
     
     # pdb.set_trace()
-    # formula = "diff ~ lagd_1 + lagd_2"
+    # formula = "diff ~ lagd_1 + lagd_12"
     # reg = sm.ols(formula=formula, data=seat).fit()
     # pred = reg.predict(seat)
     # resid = seat['drivers'].shift(12) + pred
     # sse = ((resid - seat['drivers'])**2).sum()
     # sst = ((seat['drivers'] - seat['drivers'].mean())**2).sum()
-    # # ssr = ((reg.predict(test) - test['Mortality'].mean())**2).sum()
+    # ssr = ((reg.predict(test) - test['Mortality'].mean())**2).sum()
     # ssr = sst - sse
     # r2 = ssr / sst
     # print("sst: " + str(round(sst,3)) + "   ssr: " + str(round(ssr,3)) + "    sse: " + str(round(sse,3)))
     # print("R^2:" + str(round(r2,3)))
-    # # print("MSE:  " + str(round(mse,3)))
+    # print("MSE:  " + str(round(mse,3)))
     # pdb.set_trace()
     
     
@@ -418,12 +419,12 @@ def prob2():
     ### bucket ###
     ### diff ###
     
-    # formula = "log_driv ~ petrol + lag_1 + bad_weath"
-    # # formula = "log_driv ~ petrol + lag_1 + lag_12 + lag_24 + season_m_sin"
-    # # formula = "log_driv ~ petrol + lag_1 + season_m_sin + season_m_cos"
+    formula = "log_driv ~ petrol + lag_1 + lag_12 + bad_weath"
+    # formula = "log_driv ~ petrol + lag_1 + lag_12 + season_m_sin"
+    # formula = "log_driv ~ petrol + lag_1 + lag_12 + season_m_sin + season_m_cos"
     # # formula = "log_driv ~ petrol + lag_1 + lag_12 + lag_24 + dec + nov"
     # # formula = "log_driv_diff ~ petrol + lag_1 + lag_12 + lag_24 "
-    # reg = sm.ols(formula=formula, data=seat).fit()
+    reg = sm.ols(formula=formula, data=seat).fit()
     # anova = stats.stats.anova_lm(reg, typ=2)
     # print(reg.summary())
     # print(anova)
@@ -438,11 +439,18 @@ def prob2():
     # plt.savefig("./year_resid.png", dpi=400)
     # plt.close()
     # pdb.set_trace()
+    # seat.plot.scatter(x='date', y='log_driv')
+    # plt.plot(seat['date'], reg.predict(seat), "r")
+    # plt.savefig("./y_vs_real.png", dpi=400)
+    plot_acf(reg.resid.dropna(), lags=60)
+    plt.savefig("./acf_model.png", dpi=400)
+    plt.close()
     
     
     ##### Test Law #####
     
-    formula = "log_driv ~ petrol + lag_1 + bad_weath + law"
+    formula = "log_driv ~ petrol + lag_1 + lag_12 + bad_weath + law"
+    # formula = "log_driv ~ petrol + lag_1 + lag_12 + bad_weath"
     # formula = "log_driv ~ petrol + lag_12 + lag_24 + lag_36 + bad_weath + law"
     # formula = "log_driv ~ petrol + lag_12 + lag_24 + bad_weath + law"
     reg = sm.ols(formula=formula, data=seat).fit()
@@ -453,12 +461,22 @@ def prob2():
     print("R^2:" + str(round(reg.rsquared,3)), end="   ")
     print("MSE:  " + str((reg.resid**2).mean()))
     seat['resid'] = reg.resid
-    seat.plot.scatter(x='log_driv', y='resid')
-    plt.savefig("./driv_resid_law.png", dpi=400)
+    # seat.plot.scatter(x='log_driv', y='resid')
+    # plt.savefig("./driv_resid_law.png", dpi=400)
+    # plt.close()
+    # seat.plot.scatter(x='year', y='resid')
+    # plt.savefig("./year_resid_law.png", dpi=400)
+    # plt.close()
+    # seat.plot.scatter(x='date', y='log_driv')
+    # plt.plot(seat['date'], reg.predict(seat), "r")
+    # plt.savefig("./y_vs_real_law.png", dpi=400)
+    # # plt.savefig("./y_vs_real.png", dpi=400)
+    # plt.close()
+    plot_acf(reg.resid.dropna(), lags=60)
+    plt.savefig("./acf_model_law.png", dpi=400)
     plt.close()
-    seat.plot.scatter(x='year', y='resid')
-    plt.savefig("./year_resid_law.png", dpi=400)
-    plt.close()
+    
+    
     
     pdb.set_trace()
     print()
