@@ -7,7 +7,8 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
-import statsmodels.formula.api as sm
+import statsmodels.statsmodels.formula.api as sm
+import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression
 # import statsmodels.api as sm
 from patsy import dmatrices
@@ -40,7 +41,6 @@ def ret_chart(dff):
     plt.xticks(rotation=50)
     plt.savefig("pngs/vol.png",dpi=400)
     plt.close()
-
 
 
 def prework():
@@ -90,6 +90,15 @@ def quest1():
     """
     Question 1
     """
+    pdb.set_trace()
+    import statsmodels.api as sm
+    dat = sm.datasets.get_rdataset("Guerry", "HistData").data
+    # Fit regression model (using the natural log of one of the regressors)
+    results = smf.ols('Lottery ~ Literacy + np.log(Pop1831)', data=dat).fit()
+    # Inspect the results
+    print(results.summary())
+    pdb.set_trace()
+
     start_df = pd.read_csv("prework.csv")
     djia = pd.read_csv("DJIA.csv")
     djia['lag1'] = djia.shift(-1)['Adj Close']
@@ -104,11 +113,6 @@ def quest1():
     for col in start_df_bool.columns.tolist():
         pdb.set_trace()
         temp_df = merged_df[['Date', 'Ret', 'log_sprd', col]].dropna()
-        
-        
-        
-        
-        
         reg = sm.ols(formula="Ret ~ {}".format(col), data=temp_df)
         reg.fit()
         

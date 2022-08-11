@@ -44,7 +44,7 @@ def prob2():
     # gdp.plot.scatter(x="ue_diff", y="gdp_diff")
     # plt.savefig("gdp_ue_scatter.png", dpi=400)
     # plt.close()
-
+    pdb.set_trace()
     gdp.plot.scatter(x="ue_diff", y="gdp_diff")
     reg = sm.ols(formula="gdp_diff ~ ue_diff", data=gdp).fit()
     beta = reg.params['ue_diff']
@@ -151,6 +151,6 @@ def pred_s(s, n, xm, xf, xs):
     return tot
 
 
-# prob2()
+prob2()
 # prob1()
-prob3()
+# prob3()

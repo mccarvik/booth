@@ -17,7 +17,7 @@ def abline(slope, intercept):
     plt.xlabel("Quantity", fontsize=12)
     plt.ylabel("Price", fontsize=12)
     plt.savefig("prob2.png",dpi=400)
-    plt.close
+    plt.close()
 
 
 def sup_dem_line(slope1, intercept1, slope2, intercept2):
